@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Echarts实现心电图效果</title>
+    <script src="https://cdn.bootcss.com/echarts/3.7.1/echarts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script>
+
+
+</head>
+
+<body>
+    <div style="width: 42rem;height: 43.5rem;" id="pieChartMap"></div>
+
+    <div id="totalFlowRate" style="height:300px;"></div>
+</body>
+
+</html>
+<script type="text/javascript">
+    // // 图表初始化
+    // initChart() {
+    //     this.statusChart = echarts.init(
+    //         document.getElementById('pieChartMap')
+    //     )
+    //     // 传入数据生成 option, 构建3d饼状图, 参数工具文件已经备注的很详细
+    //     this.option = getPie3D(this.optionData, 0.8, 240, 28, 26, 1)
+    //     this.statusChart.setOption(this.option)
+    //     // 是否需要label指引线，如果要就添加一个透明的2d饼状图并调整角度使得labelLine和3d的饼状图对齐，并再次setOption
+    //     this.option.series.push({
+    //         name: 'pie2d', // 自己根据场景修改
+    //         backgroundColor: 'transparent',
+    //         type: 'pie',
+    //         label: {
+    //             opacity: 1,
+    //             fontSize: 13,
+    //             lineHeight: 20,
+    //         },
+    //         startAngle: -40, // 起始角度，支持范围[0, 360]。
+    //         clockwise: false, // 饼图的扇区是否是顺时针排布。上述这两项配置主要是为了对齐3d的样式
+    //         radius: ['20%', '50%'],
+    //         center: ['50%', '50%'],
+    //         data: this.optionData,
+    //         itemStyle: {
+    //             opacity: 0, // 这里必须是0，不然2d的图会覆盖在表面
+    //         },
+    //     })
+    //     this.statusChart.setOption(this.option)
+    //     this.bindListen(this.statusChart)
+    // }
+
+    // bindListen(myChart, optionName = 'option') {
+    //     let selectedIndex = ''
+    //     let hoveredIndex = ''
+    //     // 监听点击事件，实现选中效果（单选）
+    //     myChart.on('click', (params) => {
+    //         // 从 option.series 中读取重新渲染扇形所需的参数，将是否选中取反。
+    //         const isSelected =
+    //             !this[optionName].series[params.seriesIndex].pieStatus
+    //                 .selected
+    //         const isHovered =
+    //             this[optionName].series[params.seriesIndex].pieStatus
+    //                 .hovered
+    //         const k =
+    //             this[optionName].series[params.seriesIndex].pieStatus.k
+    //         const startRatio =
+    //             this[optionName].series[params.seriesIndex].pieData
+    //                 .startRatio
+    //         const endRatio =
+    //             this[optionName].series[params.seriesIndex].pieData.endRatio
+    //         // 如果之前选中过其他扇形，将其取消选中（对 option 更新）
+    //         if (
+    //             selectedIndex !== '' &&
+    //             selectedIndex !== params.seriesIndex
+    //         ) {
+    //             this[optionName].series[selectedIndex].parametricEquation =
+    //                 getParametricEquation(
+    //                     this[optionName].series[selectedIndex].pieData
+    //                         .startRatio,
+    //                     this[optionName].series[selectedIndex].pieData
+    //                         .endRatio,
+    //                     false,
+    //                     false,
+    //                     k,
+    //                     this[optionName].series[selectedIndex].pieData.value
+    //                 )
+    //             this[optionName].series[
+    //                 selectedIndex
+    //             ].pieStatus.selected = false
+    //         }
+    //         // 对当前点击的扇形，执行选中/取消选中操作（对 option 更新）
+    //         this[optionName].series[params.seriesIndex].parametricEquation =
+    //             getParametricEquation(
+    //                 startRatio,
+    //                 endRatio,
+    //                 isSelected,
+    //                 isHovered,
+    //                 k,
+    //                 this[optionName].series[params.seriesIndex].pieData
+    //                     .value
+    //             )
+    //         this[optionName].series[params.seriesIndex].pieStatus.selected =
+    //             isSelected
+    //         // 如果本次是选中操作，记录上次选中的扇形对应的系列号 seriesIndex
+    //         selectedIndex = isSelected ? params.seriesIndex : null
+    //         // 使用更新后的 option，渲染图表
+    //         myChart.setOption(this[optionName])
+    //     })
+    //     // 监听 mouseover，近似实现高亮（放大）效果
+    //     myChart.on('mouseover', (params) => {
+    //         // 准备重新渲染扇形所需的参数
+    //         let isSelected
+    //         let isHovered
+    //         let startRatio
+    //         let endRatio
+    //         let k
+    //         // 如果触发 mouseover 的扇形当前已高亮，则不做操作
+    //         if (hoveredIndex === params.seriesIndex) {
+    //             // 否则进行高亮及必要的取消高亮操作
+    //         } else {
+    //             // 如果当前有高亮的扇形，取消其高亮状态（对 option 更新）
+    //             if (hoveredIndex !== '') {
+    //                 // 从 option.series 中读取重新渲染扇形所需的参数，将是否高亮设置为 false。
+    //                 isSelected =
+    //                     this[optionName].series[hoveredIndex].pieStatus
+    //                         .selected
+    //                 isHovered = false
+    //                 startRatio =
+    //                     this[optionName].series[hoveredIndex].pieData
+    //                         .startRatio
+    //                 endRatio =
+    //                     this[optionName].series[hoveredIndex].pieData
+    //                         .endRatio
+    //                 k = this[optionName].series[hoveredIndex].pieStatus.k
+    //                 // 对当前点击的扇形，执行取消高亮操作（对 option 更新）
+    //                 this[optionName].series[
+    //                     hoveredIndex
+    //                 ].parametricEquation = getParametricEquation(
+    //                     startRatio,
+    //                     endRatio,
+    //                     isSelected,
+    //                     isHovered,
+    //                     k,
+    //                     this[optionName].series[hoveredIndex].pieData.value
+    //                 )
+    //                 this[optionName].series[
+    //                     hoveredIndex
+    //                 ].pieStatus.hovered = isHovered
+    //                 // 将此前记录的上次选中的扇形对应的系列号 seriesIndex 清空
+    //                 hoveredIndex = ''
+    //             }
+    //             // 如果触发 mouseover 的扇形不是透明圆环，将其高亮（对 option 更新）
+    //             if (
+    //                 params.seriesName !== 'mouseoutSeries' &&
+    //                 params.seriesName !== 'pie2d'
+    //             ) {
+    //                 // 从 option.series 中读取重新渲染扇形所需的参数，将是否高亮设置为 true。
+    //                 isSelected =
+    //                     this[optionName].series[params.seriesIndex]
+    //                         .pieStatus.selected
+    //                 isHovered = true
+    //                 startRatio =
+    //                     this[optionName].series[params.seriesIndex].pieData
+    //                         .startRatio
+    //                 endRatio =
+    //                     this[optionName].series[params.seriesIndex].pieData
+    //                         .endRatio
+    //                 k =
+    //                     this[optionName].series[params.seriesIndex]
+    //                         .pieStatus.k
+    //                 // 对当前点击的扇形，执行高亮操作（对 option 更新）
+    //                 this[optionName].series[
+    //                     params.seriesIndex
+    //                 ].parametricEquation = getParametricEquation(
+    //                     startRatio,
+    //                     endRatio,
+    //                     isSelected,
+    //                     isHovered,
+    //                     k,
+    //                     this[optionName].series[params.seriesIndex].pieData
+    //                         .value + 60
+    //                 )
+    //                 this[optionName].series[
+    //                     params.seriesIndex
+    //                 ].pieStatus.hovered = isHovered
+    //                 // 记录上次高亮的扇形对应的系列号 seriesIndex
+    //                 hoveredIndex = params.seriesIndex
+    //             }
+    //             // 使用更新后的 option，渲染图表
+    //             myChart.setOption(this[optionName])
+    //         }
+    //     })
+
+    // }
+    // // 修正取消高亮失败的 bug
+    // myChart.on('globalout', (params) => {
+    //     // 准备重新渲染扇形所需的参数
+    //     let isSelected
+    //     let isHovered
+    //     let startRatio
+    //     let endRatio
+    //     let k
+    //     if (hoveredIndex !== '') {
+    //         // 从 option.series 中读取重新渲染扇形所需的参数，将是否高亮设置为 true。
+    //         isSelected =
+    //             this[optionName].series[hoveredIndex].pieStatus.selected
+    //         isHovered = false
+    //         k = this[optionName].series[hoveredIndex].pieStatus.k
+    //         startRatio =
+    //             this[optionName].series[hoveredIndex].pieData.startRatio
+    //         endRatio =
+    //             this[optionName].series[hoveredIndex].pieData.endRatio
+    //         // 对当前点击的扇形，执行取消高亮操作（对 option 更新）
+    //         this[optionName].series[hoveredIndex].parametricEquation =
+    //             getParametricEquation(
+    //                 startRatio,
+    //                 endRatio,
+    //                 isSelected,
+    //                 isHovered,
+    //                 k,
+    //                 this[optionName].series[hoveredIndex].pieData.value
+    //             )
+    //         this[optionName].series[hoveredIndex].pieStatus.hovered =
+    //             isHovered
+    //         // 将此前记录的上次选中的扇形对应的系列号 seriesIndex 清空
+    //         hoveredIndex = ''
+    //     }
+    //     // 使用更新后的 option，渲染图表
+    //     myChart.setOption(this[optionName])
+    // })
+
+    var Xdata = ['63.27', '27.90', '33.52', '17.98', '42.25', '24.54', '33.96', '11.73', '72.58', '45.36',];
+    var Ydata = ['西安市', '铜川市', '咸阳市', '汉中市', '商洛市', '安康市', '渭南市', '宝鸡市', '延安市', '榆林市',];
+
+
+    var option = {
+        title: {
+            text: '测试数据',
+            textStyle: {
+                fontSize: 12,
+                color: '#E4765D', //标题颜色
+            },
+            subtext: '',
+            subtextStyle: {
+                fontSize: 12,
+                color: '#E4765D', //副标题标题颜色
+            },
+        },
+        color: ["#3398DB"],
+        tooltip: {
+            trigger: "axis",
+            axisPointer: {
+                // 坐标轴指示器，坐标轴触发有效
+                type: "shadow", // 默认为直线，可选为：'line' | 'shadow'
+            },
+        },
+        grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "3%",
+            containLabel: true,
+        },
+        xAxis: {
+            //坐标轴类型(类目轴)
+            name: "",
+            type: "value",
+            axisLabel: {
+                show: false,
+            },
+
+            //是否显示坐标轴刻度
+            axisTick: { show: false },
+            //坐标轴线线的颜色
+            axisLine: {
+                show: false,
+            },
+
+            //是否显示网格线
+            splitLine: {
+                show: false,
+            }
+        },
+
+        dataZoom: [
+            //滑动条
+            {
+                yAxisIndex: 0, //这里是从X轴的0刻度开始
+                show: false, //是否显示滑动条，不影响使用
+                type: "slider", // 这个 dataZoom 组件是 slider 型 dataZoom 组件
+                startValue: 0, // 从头开始。
+                endValue: 4, // 一次性展示5个。
+            },
+        ],
+        yAxis: [
+            {
+                type: "category",
+                inverse: true, //是否是反向坐标轴
+                data: Ydata,
+                axisLabel: {
+                    show: true,
+                    textStyle: {
+                        color: '#ffffff',
+                    },
+                    formatter: function (value, index) {
+                        var value;
+                        // if判断转换值
+                        return value;
+                    },
+                },
+                offset: 10,
+                nameTextStyle: {
+                    fontSize: 15,
+                },
+                splitLine: { show: false },
+                axisTick: { show: false },
+                //坐标轴线线的颜色
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: '#0E3B57',
+                        type: 'solid',
+                        width: 1,
+                    },
+                },
+            },
+
+        ],
+        series: [
+            {
+                name: "用煤量",
+                type: "bar",
+                barMaxWidth: 10,
+                // barWidth: "60%",
+                data: Xdata,
+                barWidth: 8,
+                barGap: 10,
+                smooth: true,
+                label: {
+                    normal: {
+                        show: false,
+                        position: 'right',
+                        offset: [5, -2],
+                        textStyle: {
+                            color: '#F68300',
+                            fontSize: 13,
+                        },
+                    },
+                },
+                itemStyle: {
+                    emphasis: {
+                        barBorderRadius: 7,
+                    },
+                    //颜色渐变
+                    normal: {
+                        barBorderRadius: 7,
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            { offset: 0, color: '#040C3B' },
+                            { offset: 0.5, color: '#6D3F46' },
+                            { offset: 1, color: '#E4765D' }
+                        ]),
+                    },
+                },
+
+            },
+        ],
+    };
+
+    var myChart = echarts.init(document.getElementById('pieChartMap'));
+    myChart.clear();
+    myChart.setOption(option);
+
+    //自动滚动
+    this.timeOut = setInterval(() => {
+        if (option.dataZoom[0].endValue == Xdata.length) {
+            option.dataZoom[0].endValue = 4;
+            option.dataZoom[0].startValue = 0;
+        } else {
+            option.dataZoom[0].endValue = option.dataZoom[0].endValue + 1;
+            option.dataZoom[0].startValue = option.dataZoom[0].startValue + 1;
+        }
+        myChart.setOption(option);
+    }, 2000)
+
+</script>

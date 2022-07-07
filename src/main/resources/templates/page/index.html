@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	<title>电力客户行为分析</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+	<link href="js/pluginsPackage/bootstrap-3.3.0/bootstrap.css" rel="stylesheet" type="text/css">
+	</link>
+	<link href="js/pluginsPackage/swiper/swiper.min.css" rel="stylesheet" type="text/css">
+	<link href="css/style.css" rel="stylesheet" type="text/css">
+	</link>
+	<link href="css/office_efficiency_index.css" rel="stylesheet" type="text/css">
+	</link>
+	<link rel="stylesheet" type="text/css" href="css/htmleaf-demo.css">
+
+
+	<script type="text/javascript">
+		//埋点全局变量
+		var gDataGather = {
+			systemCode: "dataanalysis",
+			systemName: "CRM数据分析",
+			moduleCode: "dataanalysis-m001",
+			moduleName: "稳定运营",
+			pageCode: "dataanalysis-m001-p0007",
+			pageName: "厅店效能分析",
+			param: "{}"
+		}
+	</script>
+
+</head>
+
+<body>
+	<div class="container-fluid container-bg office-efficiency-index">
+		<div class="row  office-header">
+			<div class="col-sm-12 col-md-12 pd  title-info">电力客户行为分析一览图</div>
+			<button class="cust-type-default left active year">
+				<input id="uploadFile" type="file" /> 导入数据
+			</button>
+<!--			<button id="person_list" type="file" />-->
+<!--			<button class="cust-type-default left active year">上传数据</button>-->
+			<div class="col-sm-5  col-md-5 pd analysis-info">欢迎访问！ </div>
+			<div class="col-sm-7  col-md-7 pd analysis-filter">
+				<table style="width:100%;height:48px;">
+					<tr>
+						<td style="width:70%;text-align:right;">
+						</td>
+						<td style="width:15%;text-align:right;padding-left:10px;color:#fff;font-size:14px;font-weight:bold;"
+							id="td-data-date">
+							<!-- <input type="text" id="data-date" name="dataDate" class="form-control" style="width:100px;"/> -->
+						</td>
+						<td style="width:15%;">
+
+						</td>
+					</tr>
+				</table>
+			</div>
+			<!--地域渠道条件选择-->
+			<div id="select-group-channel-tablebar" class="select-group-channel-tablebar">
+				<div class="row">
+					<div class="col-sm-2  col-md-2 pd"
+						style="color:#fff;height:40px;line-height:35px;margin-top:15px;text-align:right;width:110px;font-size:15px;">
+						地域选择：</div>
+					<div class="col-sm-4  col-md-4 pd" style="height:40px;margin-top:15px;">
+						<input type="text" id="selectCity" name="cityCode" class="form-control" style="width:150px;" />
+					</div>
+					<div class="col-sm-2  col-md-2 pd"
+						style="color:#fff;height:40px;line-height:35px;margin-top:15px;text-align:right;width:110px;font-size:15px;">
+						区域选择：</div>
+					<div class="col-sm-4  col-md-4 pd" style="height:40px;margin-top:15px;">
+						<input type="text" id="selectCounty" name="countyCode" class="form-control"
+							style="width:150px;" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-2  col-md-2 pd"
+						style="color:#fff;height:40px;line-height:35px;margin-top:15px;text-align:right;width:110px;font-size:15px;">
+						渠道名称：</div>
+					<div class="col-sm-6  col-md-6 pd" style="height:40px;margin-top:15px;">
+						<input type="text" id="channel_name" name="channelName" class="form-control"
+							style="width:330px;" placeHolder="" />
+					</div>
+					<div class="col-sm-4  col-md-4 pd" style="height:40px;margin-top:15px;text-align:center;">
+						<button type="button" class="btn btn-info btn-sm"
+							style="height:35px;width:70px;margin-left:10px;background:#181C41;"
+							onclick="doQueryChannelName();">查询</button>
+						<button type="button" class="btn btn-info btn-sm"
+							style="height:35px;width:70px;background:#282C55;"
+							onclick="doRestChannelName();">重置</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 企业用户聚类类别数量占比分布图 -->
+		<div class="row  office-header-content">
+			<div class="col-sm-3 col-md-3 pd">
+				<div class="col-info">
+					<div class="title">企业用户聚类类别数量占比分布图</div>
+					<!--<div style="font-size: 15px; color: greenyellow; text-align: right;">(0代表高价值 1代表潜力型 2代表大众型 3代表低价值)</div>-->
+					<div style="font-size: 15px; color: greenyellow; text-align: right;">(1代表用电模式1&nbsp;&nbsp;&nbsp;&nbsp;2代表用电模式2)</div>
+					<div style="font-size: 15px; color: greenyellow; text-align: right;">(3代表用电模式3&nbsp;&nbsp;&nbsp;&nbsp;4代表用电模式4)</div>
+					<div class="content base-info" id="base-info">
+
+						<tr>
+							<td colspan="4">
+								<div class="channel-name">XXXX</div>
+							</td>
+						</tr>
+						<tr>
+							<td rowspan="2">
+								<div id="integral_echart" class="integral-echart"></div>
+							</td>
+							<td>
+								<div class="ding-dan-bg"></div>
+							</td>
+							<td>
+								<div class="ke-liu-bg"></div>
+							</td>
+							<td>
+								<div class="pai-dui-ji-bg"></div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div class="liang-shu-zhi" type="dingdanVal">--</div>
+							</td>
+							<td>
+								<div class="liang-shu-zhi" type="custNumVal">--</div>
+							</td>
+							<td>
+								<div class="liang-shu-zhi" type="lineUpVal">--</div>
+							</td>
+						</tr>
+						<tr class="td-shu-zhi">
+							<td class="popval">全省前5%</td>
+							<td>订单量</td>
+							<td>当日客流</td>
+							<td>排队时长</td>
+						</tr>
+						<tr>
+							<td>
+								<div class="channel-star-level">门店星级</div>
+							</td>
+							<td colspan="3" class="chanenl-star">
+								<img src="images/star1.png" style="width:21px;height:20px;" />
+								<img src="images/star1.png" style="width:21px;height:20px;" />
+								<img src="images/star1.png" style="width:21px;height:20px;" />
+								<img src="images/star1.png" style="width:21px;height:20px;" />
+								<img src="images/star1.png" style="width:21px;height:20px;" />
+								<div class="channel-total-score">--分</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="label-name">台席健康度：</td>
+							<td class="label-value  device-score">
+								<img src="images/star1.png" />
+								<div class="score-val">1分</div>
+							</td>
+							<td class="label-name">受理速度：</td>
+							<td class="label-value avgtime">
+								<img src="images/star1.png" />
+								<div class="score-val">1分</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="label-name">违规行为：</td>
+							<td class="label-value weigui">
+								<img src="images/star1.png" />
+								<div class="score-val">1分</div>
+							</td>
+							<td class="label-name">营销评级：</td>
+							<td class="label-value yingxiao">
+								<img src="images/star1.png" />
+								<div class="score-val">1分</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="label-name">业务量：</td>
+							<td class="label-value yewuliang">
+								<img src="images/star1.png" />
+								<div class="score-val">1分</div>
+							</td>
+							<td></td>
+							<td></td>
+						</tr>
+						</table> -->
+					</div>
+				</div>
+			</div>
+
+			<!-- 企业用电曲线聚类类别分析一览图 -->
+			<div class="col-sm-6 col-md-6 pd">
+				<div class="col-info">
+					<div class="title">
+						<span class="title_left">企业用电曲线聚类类别分析一览图</span>
+						<span class="date">2015-07-01</span>
+						<span class="counts"></span>
+
+					</div>
+					<div class="content" id="channel_handle_detail"></div>
+				</div>
+			</div>
+
+			<!-- 用户缴费价值分析 -->
+			<div class="col-sm-3 col-md-3 pd">
+				<div class="col-info">
+					<div class="title">
+						居民用户缴费价值分析
+						<div class="tab_change">
+							<div class="cust-type-default right month" type="1">按月</div>
+							<div class="cust-type-default left active year" type="2">按年</div>
+						</div>
+					</div>
+					<!-- 动态生成轮播图 -->
+					<div class="content staff-info" id="staff-info">
+					</div>
+				</div>
+			</div>
+
+			<!-- 用户缴费基本情况 -->
+			<div class="col-sm-3 col-md-3 pd device-info-col">
+				<div class="col-info">
+					<div class="title">居民用户缴费基本情况</div>
+					<!-- <div class="title-icon">
+	                  <div class="device-alarm"><svg class="icon" aria-hidden="true"><use xlink:href="#icongaojing2"></use></svg><span type="grayGrade">0</span></div>
+	                  <div class="device-alarm"><svg class="icon" aria-hidden="true"><use xlink:href="#icongaojing1"></use></svg><span type="redGrade">0</span></div>
+	                  <div class="device-alarm"><svg class="icon" aria-hidden="true"><use xlink:href="#icongaojing"></use></svg><span type="greenGrade">0</span></div>
+	               </div> -->
+					<div class="content deviceInfo" id="device-info">
+					</div>
+				</div>
+			</div>
+
+			<!-- 用电量预测 -->
+			<div class="col-sm-5 col-md-5 pd time-step-col">
+				<div class="col-info">
+					<!-- <div class="title">企业用户未来用电情况预测</div>
+					<div class="content" id="time-step-detial"></div> -->
+					<div class="demo">
+						<div class="row">
+							<div class="tab" role="tabpanel">
+								<!-- Nav tabs -->
+								<ul class="nav nav-tabs electric" role="tablist">
+									<li role="presentation" class="active"><a href="#predict1" aria-controls="home"
+											role="tab" data-toggle="tab"><i
+												class="fa fa-home"></i><span>企业用户未来用电量预测</span></a></li>
+									<li role="presentation"><a href="#predict2" aria-controls="profile" role="tab"
+											data-toggle="tab"><i class="fa fa-globe"></i><span>居民用户未来用电量预测</span></a>
+									</li>
+
+								</ul>
+								<!-- Tab panes -->
+								<div class="tab-content tabs">
+									<div role="tabpanel" class="tab-pane fade in active" id="predict1">
+										<div class="title tab_title predict">
+											<span class="count">220</span>位企业用户
+											<span class="month">8</span>月份预测总用电量为：
+											<span class="predict_electronic"> 1124190.77&nbsp;</span>KW/h
+										</div>
+
+										<div class="content" id="timeStepAnalysis1"></div>
+									</div>
+
+									<div role="tabpanel" class="tab-pane fade" id="predict2">
+										<div class="title2 predict2">
+											<span class="count">100</span>位居民用户
+											<span class="month">未来一年</span>预测总用电量为：
+											<span class="predict_electronic2"> 112130.89&nbsp;</span>KW/h
+										</div>
+										<div class="content" id="timeStepAnalysis2"></div>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+
+
+
+			<!-- 用户分类情况一览图 -->
+			<div class="col-sm-4 col-md-4 pd business-type-time-col">
+				<div class="col-info">
+					<div class="demo">
+						<div class="row">
+							<div class="tab" role="tabpanel">
+								<!-- Nav tabs -->
+								<ul class="nav nav-tabs" role="tablist">
+									<li role="presentation" class="active"><a href="#Section1" aria-controls="home"
+											role="tab" data-toggle="tab"><i
+												class="fa fa-home"></i><span>预测未来一年的高价值客户TOP5</span></a></li>
+									<li role="presentation"><a href="#Section2" aria-controls="profile" role="tab"
+											data-toggle="tab"><i class="fa fa-globe"></i><span>居民用户分类情况一览图</span></a>
+									</li>
+
+								</ul>
+								<!-- Tab panes -->
+								<div class="tab-content tabs">
+									<div role="tabpanel" class="tab-pane fade in active" id="Section1">
+										<div class="title tab_title"></div>
+										<div class="content" id="business-type-time-detial"></div>
+									</div>
+									<div role="tabpanel" class="tab-pane fade" id="Section2">
+										<div class="title2"></div>
+										<div class="content" id="business-type-time-detial2"></div>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--特效动画效果-->
+	<div id="query-page-data" style="display:none" onclick="loadPageData()" sa-gatherClick="true"
+		elementCode="dataanalysis-m001-p0007-e00001" elementName="查询数据"></div>
+
+	<script src="js/pluginsPackage/jquery/jquery-3.3.1.min.js" type="text/javascript"
+			charset="utf-8"></script>
+	<script src="js/pluginsPackage/bootstrap-3.3.0/bootstrap.js" type="text/javascript"
+			charset="utf-8"></script>
+	<script src="js/pluginsPackage/bootstrap-3.3.0/respond.js" type="text/javascript"
+			charset="utf-8"></script>
+	<script src="js/pluginsPackage/swiper/swiper.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/pluginsPackage/echarts/echarts.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/office_efficiency_data.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/office_efficiency_index.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/echarts-auto-tooltip.js" type="text/javascript"></script>
+
+
+
+</body>
+
+</html>
